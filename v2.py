@@ -1,8 +1,10 @@
-# expense_tracker version 1 week 1, 15/11/25
-# week 1 deliverable (simple CLI based application)
+# expense_tracker version 2 week: 30th nov
+# pandas and matplotlib added week 2 deliverable
+
 
 import csv
 from datetime import date
+import pandas as pd
 
 def add_expense(expenses):
     print(f"\n\tAdd a new expense")
@@ -54,11 +56,46 @@ def save_to_csv(expenses, filename="expenses.csv"):
             writer.writerow(e)
     print(f"\nSaved {len(expenses)} expense(s) to {filename}")
 
-
-
-
+def load_expenses(filename="expenses.csv"):
+    '''
+    we are going to load the csv created by v1, into a pandas dataframe.
+    return the data frame, or none if the file does not exist.
+    '''
+    try:
+        df = pd.read_csv(filename, parse_dates=["date"])
+        return df
+    except FileNotFoundError:
+        print(f"File {filename} not found. Run v1 and save some expenses.")
+        return None
     
+def summary(df):
+    print('======SUMMARY========')
+    num_expenses = len(df)
+    print(f'Number of expenses: {num_expenses}')
+
+    total_spent= df['amount'].sum()
+    print(f'Total amount of expenses so far: {total_spent:.2f}')
+
+def category_summary(df):
+    print(f'=====SPENDING BY CATEGORY=====')
+    category_total = df.groupby('category')['amount'].sum()
+    print(category_total)
 
 
 
+def main():
+    df = load_expenses()
+    if df is None:
+        return
     
+    print('\n--------Table---------')
+    print(df)
+
+    print(f'\n=======First 5 rows=======')
+    print(df.head())
+
+    summary(df)
+    category_summary(df)
+
+if __name__=='__main__':
+    main()
