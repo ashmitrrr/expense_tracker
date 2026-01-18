@@ -2,9 +2,9 @@ import streamlit as st
 import pandas as pd
 import os
 from datetime import date
-import plotly.express as px  # We'll use this for better interactive charts
+import plotly.express as px  
 
-# --- CONSTANTS ---
+
 CSV_FILE = 'expenses.csv'
 CATEGORIES = ['food', 'transport', 'rent', 'bills', 'health', 'other']
 
@@ -12,12 +12,10 @@ CATEGORIES = ['food', 'transport', 'rent', 'bills', 'health', 'other']
 def load_data():
     """Loads the CSV into a Pandas DataFrame."""
     if os.path.exists(CSV_FILE):
-        # Read CSV and ensure 'date' is actually a datetime object
         df = pd.read_csv(CSV_FILE)
         df['date'] = pd.to_datetime(df['date'])
         return df
     else:
-        # Return empty DF if file doesn't exist
         return pd.DataFrame(columns=["date", "category", "amount", "description"])
 
 def save_expense(date_input, category, amount, description):
@@ -30,10 +28,10 @@ def save_expense(date_input, category, amount, description):
     })
     
     if os.path.exists(CSV_FILE):
-        # Append without header
+    
         new_data.to_csv(CSV_FILE, mode='a', header=False, index=False)
     else:
-        # Create new file with header
+    
         new_data.to_csv(CSV_FILE, mode='w', header=True, index=False)
 
 # --- 2. PAGE CONFIG ---
@@ -41,12 +39,12 @@ st.set_page_config(page_title="Expense Tracker V3", page_icon="💰", layout="wi
 st.title("Expense Tracker V3")
 st.markdown("### The evolution: CLI → Pandas → Interactive Dashboard")
 
-# --- 3. SIDEBAR: ADD EXPENSE (The V1 Logic) ---
+# --- 3. SIDEBAR: ADD EXPENSE (v1) ---
 with st.sidebar:
     st.header("Add New Expense")
     
     with st.form("expense_form"):
-        # Streamlit widgets replace the 'input()' loops from V1
+       
         d_input = st.date_input("Date", date.today())
         cat_input = st.selectbox("Category", CATEGORIES)
         amt_input = st.number_input("Amount ($)", min_value=0.01, step=0.01)
@@ -58,19 +56,17 @@ with st.sidebar:
             if amt_input > 0:
                 save_expense(d_input, cat_input, amt_input, desc_input)
                 st.success("Expense Added!")
-                # Rerun to update the dashboard instantly
+
                 st.rerun() 
             else:
                 st.error("Amount must be greater than 0.")
 
-# --- 4. DASHBOARD (The V2 Logic) ---
+# --- 4. DASHBOARD (v2) ---
 df = load_data()
 
 if not df.empty:
-    # Top Row: Metrics
     total_spent = df['amount'].sum()
     
-    # Calculate MoM (Month over Month) if possible, for now just simple average
     avg_expense = df['amount'].mean()
     
     col1, col2, col3 = st.columns(3)
@@ -79,25 +75,21 @@ if not df.empty:
     col3.metric("Total Transactions", len(df))
 
     st.markdown("---")
-
-    # Second Row: Charts (Visualizing V2 Analysis)
     c1, c2 = st.columns([2, 1])
 
     with c1:
         st.subheader("📈 Spending Trend")
-        # Sort by date for the line chart
+        
         df_sorted = df.sort_values(by="date")
         fig_trend = px.line(df_sorted, x='date', y='amount', title="Spending Over Time", markers=True)
         st.plotly_chart(fig_trend, use_container_width=True)
 
     with c2:
         st.subheader("Category Breakdown")
-        # Group by category (The V2 Logic)
         category_total = df.groupby('category')['amount'].sum().reset_index()
         fig_pie = px.pie(category_total, values='amount', names='category', hole=0.4)
         st.plotly_chart(fig_pie, use_container_width=True)
 
-    # Third Row: Recent Data
     st.subheader("Recent Expenses")
     st.dataframe(df.sort_values(by="date", ascending=False), use_container_width=True)
 
