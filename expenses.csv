@@ -1,4 +1,6 @@
 date,category,amount,description
-2026-01-18,food,0.01,
-2026-01-18,rent,300.0,
-2026-01-18,food,300.0,
+
+2026-01-18,transport,25.0,home from work
+2026-01-18,other,120.0,Shopping At Uniqlo
+2026-01-18,food,500.0,Star
+2026-01-17,food,50.0,Spent On Dinner Yesterday
